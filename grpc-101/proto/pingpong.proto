@@ -1,0 +1,17 @@
+// This is a simple example of a proto file that defines a service with a single
+// python3 -m grpc_tools.protoc -I./proto --python_out=. --grpc_python_out=. ./proto/pingpong.proto
+syntax = "proto3";
+
+service PingPongService {
+    rpc ping (Ping) returns (Pong) {}
+}
+
+message Ping {
+    int32 count = 1;
+    // string myname = 2;
+    // float myfloat = 3;
+}
+
+message Pong {
+    int32 count = 1;
+}
