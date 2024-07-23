@@ -1,0 +1,40 @@
+services:
+  postgres-db:
+    container_name: grpc-db
+    image: postgres:15.7
+    environment:
+      POSTGRES_USER: grpc_user
+      POSTGRES_PASSWORD: grpc_password
+      POSTGRES_DB: grpc_db
+    ports:
+      - "5442:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+  grpc-server:
+    build: .
+    container_name: grpc-server
+    command: python grpc_server.py
+    depends_on:
+      - postgres-db
+    ports:
+      - "50051:50051"
+    environment:
+      DATABASE_URL: "postgresql+asyncpg://grpc_user:grpc_password@postgres-db/grpc_db"
+
+  fastapi:
+    build: .
+    container_name: api-server
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      - grpc-server
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    environment:
+      DATABASE_URL: "postgresql+asyncpg://grpc_user:grpc_password@postgres-db/grpc_db"
+
+volumes:
+  postgres_data:
